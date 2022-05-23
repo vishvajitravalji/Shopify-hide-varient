@@ -1,0 +1,50 @@
+At bottom of the product.liquid file, paste the following code:
+
+{% if product.options.size == 1 %}
+  <script>
+    var product_variants_removed = [
+      {%- for variant in product.variants -%}
+        {%- unless variant.available -%}
+          `{{ variant.title }}`,
+        {%- endunless -%}
+      {%- endfor -%}
+    ];
+  </script>
+{% endif %}
+
+{% if product.options.colour == 1 %}
+  <script>
+    var product_variants_removed = [
+      {%- for variant in product.variants -%}
+        {%- unless variant.available -%}
+          `{{ variant.title }}`,
+        {%- endunless -%}
+      {%- endfor -%}
+    ];
+  </script>
+{% endif %}
+
+At the bottom of the theme.js file, paste the following code:
+
+$( document ).ready(function() {
+  if( typeof product_variants_removed != undefined ) {  // was there items to be removed?
+    var $addToCartForm = $('form[action="/cart/add"]');
+    if (window.MutationObserver && $addToCartForm.length) {
+      if (typeof observer === 'object' && typeof observer.disconnect === 'function') {
+        observer.disconnect();
+      }
+      var config = { childList: true, subtree: true };
+      var observer = new MutationObserver(function() {
+        product_variants_removed.forEach(function(item){
+          $('.single-option-selector option').filter(function() { return $(this).text() === item; }).remove();
+        });
+        observer.disconnect();
+      });  
+      observer.observe($addToCartForm[0], config);
+      $('.single-option-selector').trigger('change');
+    }
+  }
+});
+
+
+Click Save.
